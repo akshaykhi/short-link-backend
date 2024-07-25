@@ -9,6 +9,7 @@ import java.util.List;
 
 //DO NOT EDIT EXISTING API's
 //ADD new if needed
+@CrossOrigin
 @RestController
 @RequestMapping("/Go")
 public class HelloWorldController {
