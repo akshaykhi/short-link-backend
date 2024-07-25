@@ -33,7 +33,8 @@ public class GoLinkController {
     public ResponseEntity<String> getGoLink(@PathVariable String alias, HttpServletResponse response)
     {
         try {
-            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, goLinkService.getGoLink(alias)).build();
+            String destinationURL = goLinkService.getGoLink(alias);
+            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, destinationURL).build();
         }catch (IllegalArgumentException e) {
             logger.error("Invalid alias: {}", alias, e);
             return ResponseEntity.badRequest().body("Invalid alias");

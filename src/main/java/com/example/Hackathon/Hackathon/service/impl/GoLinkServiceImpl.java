@@ -37,6 +37,6 @@ public class GoLinkServiceImpl implements GoLinkService {
                 .destinationUrl(goLinkRequest.getDestinationUrl())
                 .isActive(true)
                 .urlType(UrlType.PRIVATE)
-                .alias("go/"+goLinkRequest.getShortLink()).build();
+                .alias(goLinkRequest.getShortLink()).build();
     }
 }
