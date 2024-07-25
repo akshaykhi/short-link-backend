@@ -1,5 +1,6 @@
 package com.example.Hackathon.Hackathon.entity;
 
+import com.example.Hackathon.Hackathon.enums.UrlType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,7 +39,7 @@ public class GoLinkDetails {
     private boolean isActive;
 
     @Column(name = "url_type")
-    private String urlType;
+    private UrlType urlType;
 
     @Column(name = "created_date")
     @CreationTimestamp

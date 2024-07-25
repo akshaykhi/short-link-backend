@@ -1,6 +1,7 @@
 package com.example.Hackathon.Hackathon.service.impl;
 
 import com.example.Hackathon.Hackathon.entity.GoLinkDetails;
+import com.example.Hackathon.Hackathon.enums.UrlType;
 import com.example.Hackathon.Hackathon.model.GoLinkRequest;
 import com.example.Hackathon.Hackathon.repository.GoLinkRepository;
 import com.example.Hackathon.Hackathon.service.GoLinkService;
@@ -34,6 +35,8 @@ public class GoLinkServiceImpl implements GoLinkService {
                 .employeeId(goLinkRequest.getEmployeeId())
                 .description(goLinkRequest.getDescription())
                 .destinationUrl(goLinkRequest.getDestinationUrl())
-                .alias(goLinkRequest.getShortLink()).build();
+                .isActive(true)
+                .urlType(UrlType.PRIVATE)
+                .alias("go/"+goLinkRequest.getShortLink()).build();
     }
 }
