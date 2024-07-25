@@ -7,8 +7,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    url: jdbc:mysql://google/products?cloudSqlInstance=eighth-duality-422111-h3:asia-south1:mydbtesting&socketFactory=com.google.cloud.sql.mysql.SocketFactory
-#    url: jdbc:mysql://localhost:3306/user_db
+#    url: jdbc:mysql://google/products?cloudSqlInstance=eighth-duality-422111-h3:asia-south1:mydbtesting&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+    url: jdbc:mysql://localhost:3306/user_db
     password: root
   jpa:
     hibernate:
