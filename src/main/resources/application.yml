@@ -3,13 +3,17 @@ server:
   error:
     include-message: always
 
+isActive: true
+
 spring:
+  application:
+    name: Hackathon
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
 #    url: jdbc:mysql://google/products?cloudSqlInstance=eighth-duality-422111-h3:asia-south1:mydbtesting&socketFactory=com.google.cloud.sql.mysql.SocketFactory
     url: jdbc:mysql://localhost:3306/user_db
-    password: root
+    password: 1234
   jpa:
     hibernate:
       ddl-auto: update
