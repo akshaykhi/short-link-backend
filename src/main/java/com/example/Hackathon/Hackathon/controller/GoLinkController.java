@@ -1,7 +1,10 @@
 package com.example.Hackathon.Hackathon.controller;
 
+import com.example.Hackathon.Hackathon.entity.GoLinkDetails;
+import com.example.Hackathon.Hackathon.model.GoLinkRequest;
 import com.example.Hackathon.Hackathon.service.GoLinkService;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,24 +23,26 @@ import java.io.IOException;
 
 
 @RestController
-@RequestMapping("/Go")
+@RequestMapping("/go")
 public class GoLinkController {
     private static final Logger logger = LoggerFactory.getLogger(GoLinkController.class);
 
     @Autowired
     private GoLinkService goLinkService;
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    public void createGoLink(@Valid @RequestBody GoLinkRequest goLinkRequest) {
+        goLinkService.createGoLink(goLinkRequest);
+    }
+
+
     @GetMapping("/{id}")
-   // @ResponseBody
     public ResponseEntity<String> getGoLink(@PathVariable String alias, HttpServletResponse response)
     {
-        String result = null;
         try {
-            System.out.println("debug 1 --> " + alias);
-            result = goLinkService.getGoLink(alias);
-            System.out.println("result : "+result);
+            String result = goLinkService.getGoLink(alias);
             response.sendRedirect(result);
-
         }catch (IllegalArgumentException e) {
             logger.error("Invalid alias: {}", alias, e);
             return ResponseEntity.badRequest().body("Invalid alias");
