@@ -24,8 +24,8 @@ public class GoLinkController {
 
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.OK)
-    public void createGoLink(@Valid @RequestBody GoLinkRequest goLinkRequest) {
-        goLinkService.createGoLink(goLinkRequest);
+    public String createGoLink(@Valid @RequestBody GoLinkRequest goLinkRequest) {
+        return goLinkService.createGoLink(goLinkRequest);
     }
 
 

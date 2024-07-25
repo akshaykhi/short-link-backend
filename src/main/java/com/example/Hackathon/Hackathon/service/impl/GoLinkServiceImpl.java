@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.util.Optional;
 
 @Service
 public class GoLinkServiceImpl implements GoLinkService {
@@ -25,16 +28,23 @@ public class GoLinkServiceImpl implements GoLinkService {
     }
 
     @Override
-    public void createGoLink(GoLinkRequest goLinkRequest) {
-        GoLinkDetails goLinkDetails = mapGoLinkRequestToGoLinkDetails(goLinkRequest);
-        goLinkRepository.save(goLinkDetails);
+    public String createGoLink(GoLinkRequest goLinkRequest) {
+        String destinationUrl = goLinkRepository.findByAlias(goLinkRequest.getShortLink(), isActive);
+        if(destinationUrl == null || destinationUrl.isBlank() || destinationUrl.isEmpty()) {
+            GoLinkDetails goLinkDetails = mapGoLinkRequestToGoLinkDetails(goLinkRequest);
+            goLinkRepository.save(goLinkDetails);
+            return "Created Successfully";
+        }
+        return "Duplicate shortlink";
     }
 
     private GoLinkDetails mapGoLinkRequestToGoLinkDetails(GoLinkRequest goLinkRequest) {
         return GoLinkDetails.builder()
                 .employeeId(goLinkRequest.getEmployeeId())
                 .description(goLinkRequest.getDescription())
-                .destinationUrl(goLinkRequest.getDestinationUrl())
+                .destinationUrl(goLinkRequest.getDestinationUrl().startsWith("https://") ||
+                        goLinkRequest.getDestinationUrl().startsWith("http://") ? goLinkRequest.getDestinationUrl() :
+                        "https://"+goLinkRequest.getDestinationUrl())
                 .isActive(true)
                 .urlType(UrlType.PRIVATE)
                 .alias(goLinkRequest.getShortLink()).build();
