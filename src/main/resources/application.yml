@@ -10,10 +10,12 @@ spring:
     name: Hackathon
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-#    url: jdbc:mysql://google/products?cloudSqlInstance=eighth-duality-422111-h3:asia-south1:mydbtesting&socketFactory=com.google.cloud.sql.mysql.SocketFactory
-    url: jdbc:mysql://localhost:3306/user_db
-    password: 1234
+#    username: root
+#    url: jdbc:mysql://localhost:3306/user_db
+#    password: root
+    username: beinstance
+    url: jdbc:mysql://google/navigators?cloudSqlInstance=hackathon-be-project:asia-south1:beinstance&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+    password: root123
   jpa:
     hibernate:
       ddl-auto: update
