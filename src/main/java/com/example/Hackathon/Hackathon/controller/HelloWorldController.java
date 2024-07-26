@@ -10,7 +10,7 @@ import java.util.List;
 //DO NOT EDIT EXISTING API's
 //ADD new if needed
 @RestController
-@RequestMapping("/go")
+@RequestMapping("/Go")
 public class HelloWorldController {
 //http://localhost:8080/go/register
 
