@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @CrossOrigin
 @RestController
 @RequestMapping("/go")
@@ -24,9 +23,12 @@ public class GoLinkController {
     private GoLinkService goLinkService;
 
     @PostMapping("/create")
-    @ResponseStatus(HttpStatus.OK)
-    public String createGoLink(@Valid @RequestBody GoLinkRequest goLinkRequest) {
-        return goLinkService.createGoLink(goLinkRequest);
+    public ResponseEntity<String> createGoLink(@Valid @RequestBody GoLinkRequest goLinkRequest) {
+        try {
+            return ResponseEntity.ok().body(goLinkService.createGoLink(goLinkRequest));
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Duplicate shortlink");
+        }
     }
 
 
@@ -34,14 +36,13 @@ public class GoLinkController {
     public ResponseEntity<String> getGoLink(@PathVariable String alias, HttpServletResponse response)
     {
         try {
-            String destinationURL = goLinkService.getGoLink(alias);
-            return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY).header(HttpHeaders.LOCATION, destinationURL).build();
+            return ResponseEntity.ok().body(goLinkService.getGoLink(alias));
         }catch (IllegalArgumentException e) {
             logger.error("Invalid alias: {}", alias, e);
             return ResponseEntity.badRequest().body("Invalid alias");
         } catch (Exception e) {
             logger.error("Error occurred while fetching GoLink for alias: {}", alias, e);
-            return ResponseEntity.status(500).body("An internal server error occurred");
+            return ResponseEntity.internalServerError().body("An internal server error occurred");
         }
     }
 }
