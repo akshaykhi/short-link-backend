@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example.Hackathon</groupId>
-	<artifactId>Hackathon_1</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>Navigators_BE_Hackathon_1</artifactId>
+	<version>1.0-akshay-SNAPSHOT</version>
 	<name>Hackathon</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>

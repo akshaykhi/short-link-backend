@@ -19,7 +19,7 @@ public class HelloWorldController {
     private UserService userService;
     @RequestMapping("/hello")
     String sayHello() {
-        return "Hello The Navigators ! All the Best for Hackathon.";
+        return "Hello The Navigators ! All the Best for Hackathon .";
     }
 
     @RequestMapping("/register")

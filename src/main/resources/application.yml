@@ -4,7 +4,7 @@ server:
     include-message: always
 
 isActive: true
-
+service: BeService
 spring:
   application:
     name: Hackathon
@@ -14,7 +14,7 @@ spring:
 #    url: jdbc:mysql://localhost:3306/user_db
 #    password: root
     username: beinstance
-    url: jdbc:mysql://google/navigators?cloudSqlInstance=hackathon-be-project:asia-south1:beinstance&socketFactory=com.google.cloud.sql.mysql.SocketFactory
+    url: jdbc:mysql://google/navigators?cloudSqlInstance=lloyds-hack-grp-18:asia-south1:beinstance&socketFactory=com.google.cloud.sql.mysql.SocketFactory
     password: root123
   jpa:
     hibernate:
