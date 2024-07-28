@@ -36,6 +36,8 @@ public class GoLinkController {
     public ResponseEntity<String> getGoLink(@PathVariable String alias, HttpServletResponse response)
     {
         try {
+            // here we can return redirect 301 as well directly from backend
+            // but as we are using chrome extension so we are returning website URL as string
             return ResponseEntity.ok().body(goLinkService.getGoLink(alias));
         }catch (IllegalArgumentException e) {
             logger.error("Invalid alias: {}", alias, e);
