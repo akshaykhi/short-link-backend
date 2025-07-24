@@ -5,6 +5,8 @@ import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,24 +15,56 @@ import java.util.regex.Pattern;
 @Service
 public class ResumeParserService {
 
-    private static final Pattern EMAIL_REGEX = Pattern.compile("[\\w._%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}");
-    private static final Pattern PHONE_REGEX = Pattern.compile("(\\+91[-\\s]?)?[6789]\\d{9}");
-    private static final Pattern NAME_REGEX = Pattern.compile("(?m)^([A-Z][a-z]+\\s+[A-Z][a-z]+)$");
-    private static final Pattern EXPERIENCE_LINE = Pattern.compile("(?i)(\\|\\s*)?(TCS|Infosys|Wipro|Cognizant).*?(\\d{4}).*?(Present|\\d{4})");
+    private static final List<String> SKILL_SECTION_ALIASES = List.of(
+            "SKILLS", "TECHNICAL SKILLS", "CORE COMPETENCIES", "TECH STACK",
+            "EXPERTISE", "TOOLS", "TOOLS & TECHNOLOGIES", "TECHNOLOGIES", "PROFICIENCIES"
+    );
 
-    private static final List<String> KNOWN_SECTIONS = List.of("SKILLS", "EXPERIENCE", "EDUCATION");
+    private static final List<String> SECTION_ENDERS = List.of(
+            "EXPERIENCE", "PROFESSIONAL EXPERIENCE", "WORK HISTORY", "EMPLOYMENT",
+            "EDUCATION", "PROJECTS", "CERTIFICATIONS", "SUMMARY", "PROFILE", "OBJECTIVE"
+    );
 
-    public CandidateInfo parse(Path pdfPath) throws Exception {
-        String content = extractText(pdfPath);
+    public List<CandidateInfo> parseAllResumesInFolder(Path folderPath) {
+        List<CandidateInfo> candidates = new ArrayList<>();
 
-        CandidateInfo candidate = new CandidateInfo();
-        candidate.setEmail(extractEmail(content));
-        candidate.setMobileNumber(extractPhoneNumber(content));
-        candidate.setName(extractName(content));
-        candidate.setExperience(extractExperienceYears(content));
-        candidate.setSkills(extractSkills(content));
+        try {
+            Files.walk(folderPath)
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.toString().toLowerCase().endsWith(".pdf")
+                            || path.toString().toLowerCase().endsWith(".docx"))
+                    .forEach(path -> {
+                        try {
+                            CandidateInfo candidate = parseResume(path); // Your existing method
+                            candidates.add(candidate);
+                        } catch (Exception e) {
+                            System.err.println("Failed to parse: " + path.getFileName() + " => " + e.getMessage());
+                        }
+                    });
+        } catch (IOException e) {
+            System.err.println("Failed to walk folder: " + folderPath + " => " + e.getMessage());
+        }
 
-        return candidate;
+        return candidates;
+    }
+
+
+    public CandidateInfo parseResume(Path resumePath) throws Exception {
+        String content = extractText(resumePath);
+
+        String name = extractName(content);
+        String email = extractEmail(content);
+        String phone = extractPhoneNumber(content);
+        List<String> skills = extractSkills(content);
+        int experience = extractExperienceYears(content);
+
+        return CandidateInfo.builder()
+                .name(name)
+                .email(email)
+                .mobileNumber(phone)
+                .skills(skills)
+                .experience(experience)
+                .build();
     }
 
     private String extractText(Path filePath) throws Exception {
@@ -38,55 +72,73 @@ public class ResumeParserService {
         return tika.parseToString(new File(filePath.toString()));
     }
 
+    private String extractName(String content) {
+        String[] lines = content.split("\\R");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.split("\\s+").length >= 2 &&
+                    Character.isUpperCase(line.charAt(0)) &&
+                    line.length() < 60 &&
+                    !line.toLowerCase().contains("resume")) {
+                return line;
+            }
+        }
+        return "Unknown";
+    }
+
     private String extractEmail(String content) {
-        Matcher matcher = EMAIL_REGEX.matcher(content);
+        Matcher matcher = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}").matcher(content);
         return matcher.find() ? matcher.group() : null;
     }
 
     private String extractPhoneNumber(String content) {
-        Matcher matcher = PHONE_REGEX.matcher(content);
+        Matcher matcher = Pattern.compile("(\\+91\\s?)?[6-9][0-9]{9}").matcher(content);
         return matcher.find() ? matcher.group() : null;
     }
 
-    private String extractName(String content) {
+    private List<String> extractSkills(String content) {
+        List<String> skills = new ArrayList<>();
         String[] lines = content.split("\\R");
 
-        for (int i = 0; i < Math.min(lines.length, 6); i++) {
-            String line = lines[i].trim();
+        boolean inSkillsSection = false;
 
-            // Skip if empty or obviously not a name
-            if (line.isEmpty() ||
-                    line.contains("@") ||
-                    line.toLowerCase().contains("linkedin") ||
-                    line.toLowerCase().contains("github") ||
-                    line.matches(".*\\d.*")) {
+        for (String line : lines) {
+            String trimmed = line.trim();
+
+            if (!inSkillsSection) {
+                for (String alias : SKILL_SECTION_ALIASES) {
+                    if (trimmed.equalsIgnoreCase(alias)) {
+                        inSkillsSection = true;
+                        break;
+                    }
+                }
                 continue;
             }
 
-            // Accept if it's short and likely a name
-            if (line.split("\\s+").length <= 4 &&
-                    line.matches("^[A-Za-z .'-]+$")) {
-                return capitalizeFully(line);
+            for (String ender : SECTION_ENDERS) {
+                if (trimmed.equalsIgnoreCase(ender)) {
+                    inSkillsSection = false;
+                    break;
+                }
+            }
+
+            if (!inSkillsSection) {
+                break;
+            }
+
+            String cleaned = trimmed.replaceAll("(?i)[a-zA-Z ]+:", "");
+            String[] tokens = cleaned.split("[,|•/·\\-]+");
+
+            for (String token : tokens) {
+                String skill = token.trim();
+                if (!skill.isEmpty() && skill.length() > 1) {
+                    skills.add(skill);
+                }
             }
         }
 
-        return "Unknown";
+        return skills;
     }
-
-    // Optional: Capitalize name nicely if it's in all caps
-    private String capitalizeFully(String name) {
-        String[] words = name.trim().toLowerCase().split("\\s+");
-        StringBuilder sb = new StringBuilder();
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                sb.append(Character.toUpperCase(word.charAt(0)))
-                        .append(word.substring(1))
-                        .append(" ");
-            }
-        }
-        return sb.toString().trim();
-    }
-
 
     private int extractExperienceYears(String content) {
         Pattern yearRangePattern = Pattern.compile(
@@ -101,21 +153,18 @@ public class ResumeParserService {
 
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i];
-
             Matcher dateMatcher = yearRangePattern.matcher(line);
-            if (dateMatcher.find()) {
-                // Check surrounding lines to ignore "Education" blocks
-                String window = getSurroundingText(lines, i, 2);
 
-                if (isLikelyJobSection(window)) {
-                    String yearStr = dateMatcher.group(2);
+            if (dateMatcher.find()) {
+                String context = getSurroundingText(lines, i, 3);
+
+                if (isLikelyWorkSection(context)) {
                     try {
-                        int year = Integer.parseInt(yearStr);
-                        if (year < oldestYear) {
-                            oldestYear = year;
+                        int startYear = Integer.parseInt(dateMatcher.group(2));
+                        if (startYear < oldestYear && startYear > 1990) {
+                            oldestYear = startYear;
                         }
-                    } catch (NumberFormatException ignored) {
-                    }
+                    } catch (NumberFormatException ignored) {}
                 }
             }
         }
@@ -123,57 +172,19 @@ public class ResumeParserService {
         return oldestYear < currentYear ? (currentYear - oldestYear) : 0;
     }
 
-    private String getSurroundingText(String[] lines, int centerIndex, int windowSize) {
+    private String getSurroundingText(String[] lines, int centerIndex, int window) {
         StringBuilder sb = new StringBuilder();
-        for (int i = Math.max(0, centerIndex - windowSize); i <= Math.min(lines.length - 1, centerIndex + windowSize); i++) {
+        for (int i = Math.max(0, centerIndex - window); i <= Math.min(lines.length - 1, centerIndex + window); i++) {
             sb.append(lines[i]).append(" ");
         }
         return sb.toString().toLowerCase();
     }
 
-    private boolean isLikelyJobSection(String text) {
-        // Must not contain "education" or "college"
-        if (text.contains("education") || text.contains("college") || text.contains("bachelor")) return false;
-
-        // Should contain job-related keywords
-        return text.contains("engineer") || text.contains("developer") ||
-                text.contains("experience") || text.contains("project") ||
-                text.contains("tcs") || text.contains("intern") ||
-                text.contains("work") || text.contains("software");
-    }
-
-
-
-    private List<String> extractSkills(String content) {
-        List<String> skills = new ArrayList<>();
-        String[] lines = content.split("\\R");
-
-        boolean inSkills = false;
-        for (String line : lines) {
-            String clean = line.trim();
-
-            if (KNOWN_SECTIONS.contains(clean.toUpperCase())) {
-                inSkills = clean.equalsIgnoreCase("SKILLS");
-                continue;
-            }
-
-            if (inSkills) {
-                if (KNOWN_SECTIONS.stream().anyMatch(s -> clean.toUpperCase().startsWith(s))) {
-                    break;
-                }
-
-                String cleanedLine = clean.replaceAll("(?i)(Programming Languages:|Frameworks:|Cloud:|Databases:|Testing:|Version Control:)", "");
-                String[] parts = cleanedLine.split("[,|•|/|·|\\-\\u2022]");
-
-                for (String part : parts) {
-                    String skill = part.trim();
-                    if (!skill.isEmpty()) {
-                        skills.add(skill);
-                    }
-                }
-            }
-        }
-
-        return skills;
+    private boolean isLikelyWorkSection(String text) {
+        return !text.contains("education") && !text.contains("college") &&
+                (text.contains("engineer") || text.contains("developer") ||
+                        text.contains("intern") || text.contains("lead") ||
+                        text.contains("experience") || text.contains("project") ||
+                        text.contains("manager") || text.contains("company"));
     }
 }

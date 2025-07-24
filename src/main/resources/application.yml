@@ -10,9 +10,6 @@ spring:
     name: HackathonBE
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-#    username: root
-#    url: jdbc:mysql://localhost:3306/user_db
-#    password: root
     username: root
     url: jdbc:mysql://google/candidate_db?cloudSqlInstance=ltc-reboot25-team-57:us-central1:root&socketFactory=com.google.cloud.sql.mysql.SocketFactory
     password: root
