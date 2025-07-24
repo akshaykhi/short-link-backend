@@ -18,5 +18,10 @@ public class MatchingEngineController {
     public List<CandidateResponse> getMatchingCandidates(@RequestBody CandidateMatchRequest request) {
         return matchingService.findMatchingCandidates(request);
     }
+
+    @GetMapping("/hello")
+    public String sayHello() {
+        return "Hello, World!";
+    }
 }
 

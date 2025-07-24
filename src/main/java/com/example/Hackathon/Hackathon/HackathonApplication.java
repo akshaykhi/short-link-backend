@@ -9,7 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.nio.file.Path;
 
 @SpringBootApplication
-public class HackathonApplication implements CommandLineRunner {
+public class HackathonApplication
+{
 
 	@Autowired
 	private ResumeParserService resumeParserService;
@@ -18,8 +19,8 @@ public class HackathonApplication implements CommandLineRunner {
 		SpringApplication.run(HackathonApplication.class, args);
 	}
 
-	@Override
-	public void run(String... args) throws Exception {
-		System.out.println(resumeParserService.parse(Path.of("E:\\tmp\\destination\\john_doe_resume.pdf")).toString());
-	}
+//	@Override
+//	public void run(String... args) throws Exception {
+//		System.out.println(resumeParserService.parse(Path.of("E:\\tmp\\destination\\john_doe_resume.pdf")).toString());
+//	}
 }
