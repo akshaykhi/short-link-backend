@@ -27,7 +27,7 @@ public class MatchingEngineServiceImpl implements MatchingEngineService {
                 .map(c -> CandidateResponse.builder()
                         .name(c.getName())
                         .email(c.getEmail())
-                        .mobile(c.getMobile())
+                        .mobile(c.getMobileNumber())
                         .experience(c.getExperience())
                         .skills(c.getSkills())
                         .build())
