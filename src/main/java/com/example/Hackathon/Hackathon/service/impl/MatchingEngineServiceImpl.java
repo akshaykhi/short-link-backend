@@ -19,7 +19,7 @@ public class MatchingEngineServiceImpl implements MatchingEngineService {
 
     @Override
     public List<CandidateResponse> findMatchingCandidates(CandidateMatchRequest request) {
-        List<CandidateInfo> candidates = repository.findBySkillAndExperience(
+        List<CandidateInfo> candidates = repository.findBySkillsAndExperience(
                 request.getSkill(), request.getExperience()
         );
 
