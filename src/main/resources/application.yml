@@ -3,6 +3,12 @@ server:
   error:
     include-message: always
 
+runtime: java17  # or java21 if you're using Java 21
+
+service: hackathon-api  # <-- Custom service name
+
+instance_class: F1
+
 isActive: true
 
 spring:
