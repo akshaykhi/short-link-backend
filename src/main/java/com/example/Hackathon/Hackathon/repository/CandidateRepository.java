@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface CandidateRepository extends JpaRepository<CandidateInfo, Long> {
-    @Query("SELECT c FROM CandidateInfo c WHERE c.experience >= :minExperience AND :skill MEMBER OF c.skills")
-    List<CandidateInfo> findBySkillAndExperience(String skill, int minExperience);
+    @Query("SELECT DISTINCT c FROM CandidateInfo c JOIN c.skills s WHERE c.experience >= :minExperience AND s IN :skills")
+    List<CandidateInfo> findBySkillsAndExperience(List<String> skills, int minExperience);
 }

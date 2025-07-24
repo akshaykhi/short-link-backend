@@ -1,41 +1,26 @@
-<<<<<<< Updated upstream
+
 package com.example.Hackathon.Hackathon.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-=======
-package com.smartserve.parser.entities;
 
 import jakarta.persistence.*;
->>>>>>> Stashed changes
 
 import java.util.List;
 
 @Entity
-<<<<<<< Updated upstream
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-=======
 @Table(name = "candidate_info")
->>>>>>> Stashed changes
 public class CandidateInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-<<<<<<< Updated upstream
-    private String name;
-    private String email;
-    private String mobile;
-    private int experience;
-
-    @ElementCollection
-    private List<String> skills;
-=======
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
@@ -116,5 +101,4 @@ public class CandidateInfo {
                 ", experience=" + experience +
                 '}';
     }
->>>>>>> Stashed changes
 }
