@@ -13,4 +13,5 @@ public class CandidateResponse {
     private String mobile;
     private int experience;
     private List<String> skills;
+    private int score;
 }

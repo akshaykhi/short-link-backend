@@ -3,8 +3,6 @@ package com.example.Hackathon.Hackathon.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import jakarta.persistence.*;
-
 import java.util.List;
 
 @Entity
@@ -28,6 +26,9 @@ public class CandidateInfo {
 
     @Column(name = "mobile_number", length = 50)
     private String mobileNumber;
+
+    @Column(name = "score")
+    private Integer score;
 
     @ElementCollection
     @CollectionTable(
