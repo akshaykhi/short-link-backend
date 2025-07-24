@@ -11,6 +11,9 @@ instance_class: F1
 
 isActive: true
 
+resumes:
+  path: E:\tmp\destination
+
 spring:
   application:
     name: HackathonBE

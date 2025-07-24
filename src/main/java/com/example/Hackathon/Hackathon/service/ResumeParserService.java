@@ -1,7 +1,11 @@
 package com.example.Hackathon.Hackathon.service;
 
 import com.example.Hackathon.Hackathon.entity.CandidateInfo;
+import com.example.Hackathon.Hackathon.repository.CandidateRepository;
 import org.apache.tika.Tika;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -15,6 +19,12 @@ import java.util.regex.Pattern;
 @Service
 public class ResumeParserService {
 
+    @Value("${resumes.path}")
+    private String resumePath;
+
+    @Autowired
+    private CandidateRepository candidateRepository;
+
     private static final List<String> SKILL_SECTION_ALIASES = List.of(
             "SKILLS", "TECHNICAL SKILLS", "CORE COMPETENCIES", "TECH STACK",
             "EXPERTISE", "TOOLS", "TOOLS & TECHNOLOGIES", "TECHNOLOGIES", "PROFICIENCIES"
@@ -25,28 +35,44 @@ public class ResumeParserService {
             "EDUCATION", "PROJECTS", "CERTIFICATIONS", "SUMMARY", "PROFILE", "OBJECTIVE"
     );
 
-    public List<CandidateInfo> parseAllResumesInFolder(Path folderPath) {
-        List<CandidateInfo> candidates = new ArrayList<>();
+
+    @Scheduled(cron = "*/10 * * * * *")
+    public void parseAllResumesInFolder() {
+        List<CandidateInfo> candidatesToInsert = new ArrayList<>();
 
         try {
-            Files.walk(folderPath)
+            Files.walk(Path.of(resumePath))
                     .filter(Files::isRegularFile)
                     .filter(path -> path.toString().toLowerCase().endsWith(".pdf")
                             || path.toString().toLowerCase().endsWith(".docx"))
                     .forEach(path -> {
                         try {
-                            CandidateInfo candidate = parseResume(path); // Your existing method
-                            candidates.add(candidate);
+                            CandidateInfo candidate = parseResume(path); // Your parser
+                            String email = candidate.getEmail();
+
+                            if (email != null && !email.isBlank()) {
+                                if (!candidateRepository.existsByEmail(email)) {
+                                    candidatesToInsert.add(candidate);
+                                } else {
+                                    System.out.println("Email already exists in DB: " + email);
+                                }
+                            } else {
+                                System.out.println("Skipping candidate with missing email in file: " + path.getFileName());
+                            }
+
                         } catch (Exception e) {
                             System.err.println("Failed to parse: " + path.getFileName() + " => " + e.getMessage());
                         }
                     });
         } catch (IOException e) {
-            System.err.println("Failed to walk folder: " + folderPath + " => " + e.getMessage());
+            System.err.println("Failed to walk folder: " + resumePath + " => " + e.getMessage());
         }
 
-        return candidates;
+        if (!candidatesToInsert.isEmpty()) {
+            candidateRepository.saveAll(candidatesToInsert);
+        }
     }
+
 
 
     public CandidateInfo parseResume(Path resumePath) throws Exception {

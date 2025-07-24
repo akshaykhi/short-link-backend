@@ -11,4 +11,6 @@ import java.util.List;
 public interface CandidateRepository extends JpaRepository<CandidateInfo, Long> {
     @Query("SELECT DISTINCT c FROM CandidateInfo c JOIN c.skills s WHERE c.experience >= :minExperience AND s IN :skills")
     List<CandidateInfo> findBySkillsAndExperience(List<String> skills, int minExperience);
+
+    boolean existsByEmail(String email);
 }
